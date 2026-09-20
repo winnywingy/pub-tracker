@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HKUST PubsFinder - Publication Reconciliation System</title>
-
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS for XLSX parsing -->
@@ -108,7 +107,6 @@
     </div>
 
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
-
         <!-- Navigation Tabs -->
         <div class="border-b border-slate-200 flex justify-between items-center">
             <nav class="-mb-px flex space-x-8" aria-label="Tabs">
@@ -118,7 +116,7 @@
                 </button>
                 <button id="tab-btn-reconcile" onclick="switchTab('reconcile')" class="border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center space-x-2">
                     <i data-lucide="git-compare" class="w-4 h-4"></i>
-                    <span>2. Review Queue & Matching</span>
+                    <span>2. Review & Matching</span>
                     <span id="pending-badge" class="ml-1 px-2 py-0.5 text-xs bg-amber-100 text-amber-800 rounded-full font-bold">0</span>
                 </button>
             </nav>
@@ -148,8 +146,9 @@
                         <i data-lucide="file-spreadsheet" class="w-10 h-10 mx-auto text-slate-400 mb-2"></i>
                         <p class="text-xs font-semibold text-slate-700">Click to browse or drop Scopus file here</p>
                         <p class="text-[11px] text-slate-400 mt-1">Supports XLSX, CSV, or BibTeX files</p>
-                        <input type="file" id="scopus-input" accept=".csv,.xlsx,.xls,.bib" class="hidden" onchange="handleFileUpload(event, 'scopus')">
                     </div>
+                    <input type="file" id="scopus-input" accept=".csv,.xlsx,.xls,.bib" class="hidden" onclick="event.stopPropagation()" onchange="handleFileUpload(event, 'scopus')">
+
                     <div id="scopus-file-info" class="hidden bg-slate-100 rounded-lg p-3 text-xs space-y-2 border border-slate-200">
                         <div class="flex items-center justify-between font-semibold text-slate-700">
                             <span id="scopus-filename" class="truncate max-w-[200px]">filename.csv</span>
@@ -175,8 +174,9 @@
                         <i data-lucide="file-input" class="w-9 h-9 mx-auto text-slate-400 mb-1.5"></i>
                         <p class="text-xs font-semibold text-slate-700">Click to browse or drop Candidate file(s) here</p>
                         <p class="text-[11px] text-slate-400 mt-1">Supports XLSX, CSV, or BibTeX (Select multiple or upload sequentially)</p>
-                        <input type="file" id="target-input" accept=".csv,.xlsx,.xls,.bib" multiple class="hidden" onchange="handleFileUpload(event, 'target')">
                     </div>
+                    <input type="file" id="target-input" accept=".csv,.xlsx,.xls,.bib" multiple class="hidden" onclick="event.stopPropagation()" onchange="handleFileUpload(event, 'target')">
+
                     <div id="target-file-info" class="hidden space-y-2">
                         <div class="flex justify-between items-center text-xs font-semibold text-slate-700">
                             <span>Uploaded Candidate Datasets (<span id="target-file-count">0</span> files):</span>
@@ -342,9 +342,9 @@
                         <div class="flex items-center justify-between border-b border-slate-200 pb-2">
                             <span class="font-bold text-blue-900 text-xs flex items-center space-x-1">
                                 <i data-lucide="database" class="w-3.5 h-3.5"></i>
-                                <span>Scopus Baseline Record</span>
+                                <span>Scopus Record</span>
                             </span>
-                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded">Repository Master</span>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded">Master Record</span>
                         </div>
                         <div class="space-y-2">
                             <div><p class="text-[10px] font-semibold text-slate-400 uppercase">Publication Title</p><p id="modal-scopus-title" class="font-semibold text-slate-800 leading-snug">Scopus Title</p></div>
@@ -354,23 +354,12 @@
                                 <div><p class="text-[10px] font-semibold text-slate-400 uppercase">Source / Journal</p><p id="modal-scopus-journal" class="text-slate-700">IEEE Transactions on Artificial Intelligence</p></div>
                                 <div><p class="text-[10px] font-semibold text-slate-400 uppercase">Year</p><p id="modal-scopus-year" class="text-slate-700">2024</p></div>
                             </div>
-                            <div><p class="text-[10px] font-semibold text-slate-400 uppercase">Scopus Source ID / EID</p><p id="modal-scopus-eid" class="text-slate-600 font-mono bg-slate-50 p-2 rounded border border-slate-200">2-s2.0-851992019</p></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                <button onclick="closeDiffModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-semibold text-xs transition">Close Inspection</button>
-                <div class="flex items-center space-x-2">
-                    <button id="modal-btn-duplicate" onclick="actionFromModal('MARK_DUPLICATE')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold text-xs transition flex items-center space-x-1.5 shadow">
-                        <i data-lucide="copy" class="w-4 h-4"></i>
-                        <span>Mark as Duplicate (Skip Ingestion)</span>
-                    </button>
-                    <button id="modal-btn-import" onclick="actionFromModal('IMPORT')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs transition flex items-center space-x-1.5 shadow">
-                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                        <span>Import Novel Record to Repository</span>
-                    </button>
-                </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-start items-center">
+                <button onclick="closeDiffModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 font-semibold text-xs transition">Close</button>
             </div>
         </div>
     </div>
@@ -381,7 +370,7 @@
             doi: ['doi', 'document object identifier', 'di', 'doi number', 'doi_id'],
             authors: ['authors', 'author', 'author names', 'creator', '作者', 'au'],
             journal: ['journal', 'source title', 'publication name', 'journal title', 'booktitle', 'publisher', '刊名', '期刊', 'so'],
-            year: ['year', 'publication year', 'pub year', 'py'],
+            year: ['year', 'publication year', 'pub year', 'py', '出版年'],
             affiliation: ['affiliation', 'affiliations', 'author keywords', 'address', 'institution', 'organization', 'c1', 'rp', '单位', '机构', 'affil'],
             source: ['source', 'database', 'db']
         };
@@ -419,7 +408,6 @@
             const fileName = file.name;
             const ext = fileName.split('.').pop().toLowerCase();
             const reader = new FileReader();
-
             reader.onload = function(e) {
                 try {
                     let rawRecords = [];
@@ -427,12 +415,12 @@
                         rawRecords = parseBibTeX(e.target.result);
                     } else if (ext === 'csv') {
                         const parsed = Papa.parse(e.target.result, { header: true, skipEmptyLines: true });
-                        rawRecords = parsed.data;
+                        rawRecords = parsed.data || [];
                     } else if (ext === 'xlsx' || ext === 'xls') {
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        rawRecords = XLSX.utils.sheet_to_json(sheet);
+                        rawRecords = XLSX.utils.sheet_to_json(sheet) || [];
                     } else {
                         showToast('Unsupported file format: ' + ext);
                         return;
@@ -441,7 +429,7 @@
                     const mappedRecords = rawRecords.map((item, idx) => {
                         const mapped = mapHeadersToStandard(item);
                         return {
-                            id: item.id || `${type}_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+                            id: `${type}_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
                             title: mapped.title || item.title || item.Title || '',
                             doi: mapped.doi || item.doi || item.DOI || '',
                             authors: mapped.authors || item.authors || item.Authors || item.Author || '',
@@ -449,7 +437,7 @@
                             year: mapped.year || item.year || item.Year || '',
                             source: mapped.source || (type === 'scopus' ? 'Scopus' : fileName)
                         };
-                    }).filter(r => r.title || r.doi);
+                    }).filter(r => (r.title && r.title.trim().length > 0) || (r.doi && r.doi.trim().length > 0));
 
                     if (mappedRecords.length === 0) {
                         showToast(`No valid publication records parsed from ${fileName}`);
@@ -475,7 +463,6 @@
                         rebuildTargetData();
                         showToast(`Loaded ${mappedRecords.length} candidate records from ${fileName}`);
                     }
-
                     checkRunButtonState();
                     updateStats();
                 } catch (err) {
@@ -497,7 +484,6 @@
             const infoContainer = document.getElementById('target-file-info');
             const listEl = document.getElementById('target-files-list');
             if (!infoContainer || !listEl) return;
-
             if (state.targetFiles.length > 0) {
                 infoContainer.classList.remove('hidden');
                 safeSetText('target-file-count', state.targetFiles.length);
@@ -543,12 +529,12 @@
 
         function mapHeadersToStandard(rawObj) {
             const mapped = { title: '', doi: '', authors: '', journal: '', year: '', affiliation: '', source: '' };
-            const keys = Object.keys(rawObj);
+            const keys = Object.keys(rawObj || {});
             keys.forEach(key => {
-                const cleanKey = key.trim().toLowerCase();
+                const cleanKey = key.replace(/^\ufeff/, '').trim().toLowerCase();
                 for (const [stdField, aliases] of Object.entries(COLUMN_ALIASES)) {
                     if (!mapped[stdField] && aliases.includes(cleanKey)) {
-                        mapped[stdField] = rawObj[key] ? String(rawObj[key]).trim() : '';
+                        mapped[stdField] = rawObj[key] != null ? String(rawObj[key]).trim() : '';
                     }
                 }
             });
@@ -574,7 +560,11 @@
         function normalizeDOI(doi) {
             if (!doi) return '';
             let d = String(doi).trim().toLowerCase();
-            d = decodeURIComponent(d);
+            try {
+                d = decodeURIComponent(d);
+            } catch (e) {
+                // Ignore malformed URI sequences
+            }
             d = d.replace(/^https?:\/\/(dx\.)?doi\.org\//, '');
             d = d.replace(/^doi:\s*/, '');
             return d.replace(/[\.\/]+$/, '').trim();
@@ -583,38 +573,55 @@
         function calculateSimilarity(str1, str2) {
             if (!str1 || !str2) return 0;
             if (str1 === str2) return 1.0;
+            const maxLen = Math.max(str1.length, str2.length);
+            if (maxLen === 0) return 1.0;
+            if (Math.abs(str1.length - str2.length) / maxLen > 0.35) return 0;
+
             const jwScore = jaroWinkler(str1, str2);
-            const levScore = 1 - (levenshteinDistance(str1, str2) / Math.max(str1.length, str2.length));
+            if (jwScore < 0.5) return jwScore * 0.6;
+
+            const levScore = 1 - (levenshteinDistance(str1, str2) / maxLen);
             return (jwScore * 0.6) + (levScore * 0.4);
         }
 
         function levenshteinDistance(a, b) {
-            const matrix = [];
-            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-            for (let i = 1; i <= b.length; i++) {
-                for (let j = 1; j <= a.length; j++) {
-                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                        matrix[i][j] = matrix[i - 1][j - 1];
-                    } else {
-                        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
-                    }
+            const al = a.length;
+            const bl = b.length;
+            if (al === 0) return bl;
+            if (bl === 0) return al;
+
+            let prev = new Int32Array(bl + 1);
+            let curr = new Int32Array(bl + 1);
+            for (let j = 0; j <= bl; j++) prev[j] = j;
+
+            for (let i = 1; i <= al; i++) {
+                curr[0] = i;
+                const ac = a.charCodeAt(i - 1);
+                for (let j = 1; j <= bl; j++) {
+                    const cost = ac === b.charCodeAt(j - 1) ? 0 : 1;
+                    curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
                 }
+                const temp = prev;
+                prev = curr;
+                curr = temp;
             }
-            return matrix[b.length][a.length];
+            return prev[bl];
         }
 
         function jaroWinkler(s1, s2) {
             let m = 0;
-            if (s1.length === 0 || s2.length === 0) return 0;
+            const l1 = s1.length;
+            const l2 = s2.length;
+            if (l1 === 0 || l2 === 0) return 0;
             if (s1 === s2) return 1;
-            const range = Math.floor(Math.max(s1.length, s2.length) / 2) - 1;
-            const s1Matches = new Array(s1.length).fill(false);
-            const s2Matches = new Array(s2.length).fill(false);
 
-            for (let i = 0; i < s1.length; i++) {
+            const range = Math.max(0, Math.floor(Math.max(l1, l2) / 2) - 1);
+            const s1Matches = new Array(l1).fill(false);
+            const s2Matches = new Array(l2).fill(false);
+
+            for (let i = 0; i < l1; i++) {
                 const low = Math.max(0, i - range);
-                const high = Math.min(i + range + 1, s2.length);
+                const high = Math.min(i + range + 1, l2);
                 for (let j = low; j < high; j++) {
                     if (!s2Matches[j] && s1[i] === s2[j]) {
                         s1Matches[i] = true;
@@ -627,18 +634,19 @@
             if (m === 0) return 0;
 
             let k = 0, numTrans = 0;
-            for (let i = 0; i < s1.length; i++) {
+            for (let i = 0; i < l1; i++) {
                 if (s1Matches[i]) {
-                    while (!s2Matches[k]) k++;
-                    if (s1[i] !== s2[k]) numTrans++;
+                    while (k < l2 && !s2Matches[k]) k++;
+                    if (k < l2 && s1[i] !== s2[k]) numTrans++;
                     k++;
                 }
             }
-            const jaro = (m / s1.length + m / s2.length + (m - numTrans / 2) / m) / 3;
-            let p = 0.1;
+
+            const jaro = (m / l1 + m / l2 + (m - numTrans / 2) / m) / 3;
             let l = 0;
-            while (l < 4 && s1[l] === s2[l]) l++;
-            return jaro + l * p * (1 - jaro);
+            const maxPrefix = Math.min(4, Math.min(l1, l2));
+            while (l < maxPrefix && s1[l] === s2[l]) l++;
+            return jaro + l * 0.1 * (1 - jaro);
         }
 
         function parseBibTeX(text) {
@@ -646,7 +654,6 @@
             if (!text) return entries;
             let i = 0;
             const len = text.length;
-
             while (i < len) {
                 const atIdx = text.indexOf('@', i);
                 if (atIdx === -1) break;
@@ -655,18 +662,15 @@
                 if (!typeMatch) continue;
                 const entryType = typeMatch[1].toLowerCase();
                 if (['comment', 'preamble', 'string'].includes(entryType)) continue;
-
                 const openCharIdx = text.indexOf(typeMatch[0].slice(-1), i + typeMatch[1].length);
                 if (openCharIdx === -1) break;
                 const openChar = text[openCharIdx];
                 const closeChar = openChar === '{' ? '}' : ')';
                 i = openCharIdx + 1;
-
                 const commaIdx = text.indexOf(',', i);
                 if (commaIdx === -1) break;
                 const citeKey = text.slice(i, commaIdx).trim();
                 i = commaIdx + 1;
-
                 const fields = {};
                 let braceDepth = 1;
                 while (i < len && braceDepth > 0) {
@@ -676,7 +680,6 @@
                     }
                     if (braceDepth === 0 || i >= len) break;
                     if (text[i] === closeChar) { braceDepth--; i++; break; }
-
                     const keyMatch = text.slice(i).match(/^([a-zA-Z0-9_:-]+)\s*=\s*/);
                     if (!keyMatch) {
                         if (text[i] === closeChar) { braceDepth--; i++; break; }
@@ -686,7 +689,6 @@
                     const fieldKey = keyMatch[1].toLowerCase();
                     i += keyMatch[0].length;
                     let fieldValue = '';
-
                     if (i < len) {
                         if (text[i] === '{') {
                             let fieldBraceDepth = 1;
@@ -721,7 +723,6 @@
                     }
                     fields[fieldKey] = cleanBibValue(fieldValue);
                 }
-
                 if (citeKey || Object.keys(fields).length > 0) {
                     entries.push({
                         id: citeKey || `bib_${entries.length}`,
@@ -745,6 +746,9 @@
         }
 
         function setupDropzones() {
+            window.addEventListener('dragover', (e) => e.preventDefault(), false);
+            window.addEventListener('drop', (e) => e.preventDefault(), false);
+
             ['scopus', 'target'].forEach(type => {
                 const dropzone = document.getElementById(`${type}-dropzone`);
                 if (!dropzone) return;
@@ -755,7 +759,7 @@
                         dropzone.classList.add('border-hkust-gold', 'bg-slate-100');
                     }, false);
                 });
-                ['dragleave', 'drop'].forEach(eventName => {
+                ['dragleave'].forEach(eventName => {
                     dropzone.addEventListener(eventName, (e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -763,8 +767,11 @@
                     }, false);
                 });
                 dropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('border-hkust-gold', 'bg-slate-100');
                     const dt = e.dataTransfer;
-                    if (dt.files.length > 0) {
+                    if (dt && dt.files.length > 0) {
                         if (type === 'target') {
                             Array.from(dt.files).forEach(f => processFile(f, 'target'));
                         } else {
@@ -780,7 +787,6 @@
                 showToast('Please upload both Scopus Baseline and Candidate target files.');
                 return;
             }
-
             const modal = document.getElementById('modal-progress');
             const pBar = document.getElementById('progress-bar');
             safeSetText('progress-title', 'Running...');
@@ -809,7 +815,7 @@
             const total = state.targetData.length;
             const results = [];
             let processed = 0;
-            const batchSize = 100;
+            const batchSize = 60;
 
             function processBatch(startIndex) {
                 const endIndex = Math.min(startIndex + batchSize, total);
@@ -836,7 +842,7 @@
                             const matches = fastIndex.scopusTokenIndex.get(tk);
                             if (matches) matches.forEach(m => candidateSet.add(m));
                         });
-                        const pool = candidateSet.size > 0 ? Array.from(candidateSet) : state.scopusData.slice(0, 300);
+                        const pool = candidateSet.size > 0 ? Array.from(candidateSet) : state.scopusData.slice(0, 150);
                         for (const sItem of pool) {
                             const sTitle = normalizeTitle(sItem.title);
                             if (Math.abs(sTitle.length - tTitle.length) > 30) continue;
@@ -869,7 +875,7 @@
                 safeSetText('progress-percent', `${pct}%`);
 
                 if (processed < total) {
-                    requestAnimationFrame(() => processBatch(processed));
+                    setTimeout(() => processBatch(processed), 10);
                 } else {
                     setTimeout(() => {
                         state.reconciliationResults = results;
@@ -877,8 +883,8 @@
                         switchTab('reconcile');
                         applyFilters();
                         updateStats();
-                        showToast(`Reconciliation complete! Screened ${results.length} candidate publications.`);
-                    }, 200);
+                        showToast(`Screening complete! Screened ${results.length} candidate publications.`);
+                    }, 100);
                 }
             }
             processBatch(0);
@@ -887,7 +893,6 @@
         function applyFilters() {
             const query = (document.getElementById('queue-search')?.value || '').toLowerCase();
             const statusFilter = document.getElementById('filter-status')?.value || 'UNMATCHED';
-
             state.filteredQueue = state.reconciliationResults.filter(item => {
                 if (statusFilter === 'UNMATCHED' && item.status !== 'UNMATCHED') return false;
                 if (query) {
@@ -904,11 +909,9 @@
             const tbody = document.getElementById('queue-tbody');
             if (!tbody) return;
             tbody.innerHTML = '';
-
             const totalFiltered = state.filteredQueue.length;
             const totalPages = Math.ceil(totalFiltered / state.pageSize) || 1;
             state.currentPage = Math.min(state.currentPage, totalPages);
-
             const startIdx = (state.currentPage - 1) * state.pageSize;
             const endIdx = Math.min(startIdx + state.pageSize, totalFiltered);
             const pageItems = state.filteredQueue.slice(startIdx, endIdx);
@@ -937,11 +940,10 @@
                 return;
             }
 
-            pageItems.forEach(item => {
+            pageItems.forEach((item, pIdx) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
                 const isChecked = state.selectedIds.has(item.target.id);
-
                 let statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">Missing</span>';
                 if (item.status === 'MATCHED') {
                     statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Duplicate</span>';
@@ -959,7 +961,7 @@
                     </td>
                     <td class="p-3.5 font-mono text-xs">
                         ${item.target.doi ? `
-                            <a href="https://doi.org/${escapeHtml(item.target.doi)}" target="_blank" class="text-blue-600 hover:underline flex items-center space-x-1">
+                            <a href="https://doi.org/${encodeURIComponent(item.target.doi)}" target="_blank" class="text-blue-600 hover:underline flex items-center space-x-1">
                                 <span class="truncate max-w-[200px]">${escapeHtml(item.target.doi)}</span>
                                 <i data-lucide="external-link" class="w-3 h-3 flex-shrink-0"></i>
                             </a>
@@ -986,7 +988,6 @@
             const reconcileTab = document.getElementById('tab-content-reconcile');
             const btnUpload = document.getElementById('tab-btn-upload');
             const btnReconcile = document.getElementById('tab-btn-reconcile');
-
             if (tab === 'upload') {
                 uploadTab.classList.remove('hidden');
                 reconcileTab.classList.add('hidden');
@@ -1013,9 +1014,9 @@
         function formatBibTeXTitle(title) {
             if (!title) return '';
             let cleaned = title.replace(/\s+/g, ' ').trim();
-            cleaned = cleaned.replace(/\{\[\s*$/, '').replace(/,$/, '').trim();
+            cleaned = cleaned.replace(/\{\[ \s*$/, '').replace(/,$/, '').trim();
             cleaned = cleaned.replace(/\b([A-Z0-9\-]{2,})\b/g, '{$1}');
-            return cleaned.replace(/(?<!\\)&/g, '\\&');
+            return cleaned.replace(/\\&/g, '___AMP___').replace(/&/g, '\\&').replace(/___AMP___/g, '\\&');
         }
 
         function toTitleCase(str) {
@@ -1028,11 +1029,11 @@
                     return word.charAt(0).toUpperCase() + word.slice(1);
                 }).join(' ');
             }
-            return text.replace(/(?<!\\)&/g, '\\&');
+            return text.replace(/\\&/g, '___AMP___').replace(/&/g, '\\&').replace(/___AMP___/g, '\\&');
         }
 
         function generateCiteKey(author, year, title) {
-            let firstAuthor = 'Anonymous';
+            let firstAuthor = 'Author';
             if (author) {
                 const primary = author.split(/;|,|and/i)[0].trim();
                 const parts = primary.split(/\s+/);
@@ -1053,7 +1054,6 @@
                 showToast('No missing publications to export.');
                 return;
             }
-
             const exportData = missing.map(m => ({
                 Title: m.target.title,
                 DOI: m.target.doi,
@@ -1076,9 +1076,8 @@
                     const citeKey = generateCiteKey(m.target.authors, m.target.year, m.target.title);
                     const cleanTitle = formatBibTeXTitle(m.target.title);
                     const cleanJournal = toTitleCase(m.target.journal);
-                    const cleanAuthors = (m.target.authors || '').replace(/\s+/g, ' ').replace(/(?<!\\)&/g, '\\&').trim();
+                    const cleanAuthors = (m.target.authors || '').replace(/\s+/g, ' ').replace(/\\&/g, '___AMP___').replace(/&/g, '\\&').replace(/___AMP___/g, '\\&').trim();
                     const cleanDoi = (m.target.doi || '').trim();
-
                     let fields = [];
                     if (cleanTitle) fields.push(`  title={${cleanTitle}}`);
                     if (cleanAuthors) fields.push(`  author={${cleanAuthors}}`);
@@ -1108,7 +1107,6 @@
                 MatchedScopusTitle: r.bestMatch ? r.bestMatch.title : 'N/A',
                 MatchedScopusDOI: r.bestMatch ? r.bestMatch.doi : 'N/A'
             }));
-
             const ws = XLSX.utils.json_to_sheet(auditData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Audit Log");
@@ -1175,14 +1173,12 @@
                 safeSetText('modal-scopus-authors', item.bestMatch.authors || 'N/A');
                 safeSetText('modal-scopus-journal', item.bestMatch.journal || 'N/A');
                 safeSetText('modal-scopus-year', item.bestMatch.year || 'N/A');
-                safeSetText('modal-scopus-eid', item.bestMatch.id || 'N/A');
             } else {
                 safeSetText('modal-scopus-title', 'No matching record in Scopus master dataset');
                 safeSetText('modal-scopus-doi', 'N/A');
                 safeSetText('modal-scopus-authors', 'N/A');
                 safeSetText('modal-scopus-journal', 'N/A');
                 safeSetText('modal-scopus-year', 'N/A');
-                safeSetText('modal-scopus-eid', 'N/A');
             }
 
             safeSetText('modal-match-status', item.status === 'MATCHED' ? 'Duplicate Record Found' : (item.status === 'FLAGGED' ? 'Potential Match Identified' : 'Novel Missing Publication'));
@@ -1195,20 +1191,6 @@
             const modal = document.getElementById('modal-diff');
             if (modal) modal.classList.add('hidden');
             state.activeDiffRecord = null;
-        }
-
-        function actionFromModal(action) {
-            if (!state.activeDiffRecord) return;
-            if (action === 'MARK_DUPLICATE') {
-                state.activeDiffRecord.status = 'MATCHED';
-                showToast('Marked publication as Duplicate.');
-            } else if (action === 'IMPORT') {
-                state.activeDiffRecord.status = 'UNMATCHED';
-                showToast('Marked publication for Import.');
-            }
-            closeDiffModal();
-            applyFilters();
-            updateStats();
         }
 
         function updateStats() {
