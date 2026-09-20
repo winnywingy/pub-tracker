@@ -39,7 +39,6 @@
     </style>
 </head>
 <body class="h-full flex flex-col text-slate-800">
-
     <!-- Top Navigation Header -->
     <header class="bg-hkust-navy text-white shadow-md sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -86,7 +85,6 @@
             </div>
         </div>
     </header>
-
     <!-- Async Reconciliation Progress Modal -->
     <div id="modal-progress" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 text-center space-y-4 border border-slate-200">
@@ -105,7 +103,6 @@
             </div>
         </div>
     </div>
-
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
         <!-- Navigation Tabs -->
         <div class="border-b border-slate-200 flex justify-between items-center">
@@ -127,7 +124,6 @@
                 </span>
             </div>
         </div>
-
         <!-- TAB 1: FILE UPLOAD & CONFIGURATION -->
         <div id="tab-content-upload" class="space-y-6">
             <!-- Upload Grid -->
@@ -148,7 +144,6 @@
                         <p class="text-[11px] text-slate-400 mt-1">Supports XLSX, CSV, or BibTeX files</p>
                     </div>
                     <input type="file" id="scopus-input" accept=".csv,.xlsx,.xls,.bib" class="hidden" onclick="event.stopPropagation()" onchange="handleFileUpload(event, 'scopus')">
-
                     <div id="scopus-file-info" class="hidden bg-slate-100 rounded-lg p-3 text-xs space-y-2 border border-slate-200">
                         <div class="flex items-center justify-between font-semibold text-slate-700">
                             <span id="scopus-filename" class="truncate max-w-[200px]">filename.csv</span>
@@ -160,7 +155,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Comparison Target File Card (WoS / CNKI / BibTeX) -->
                 <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
                     <div class="flex items-center justify-between">
@@ -176,7 +170,6 @@
                         <p class="text-[11px] text-slate-400 mt-1">Supports XLSX, CSV, or BibTeX (Select multiple or upload sequentially)</p>
                     </div>
                     <input type="file" id="target-input" accept=".csv,.xlsx,.xls,.bib" multiple class="hidden" onclick="event.stopPropagation()" onchange="handleFileUpload(event, 'target')">
-
                     <div id="target-file-info" class="hidden space-y-2">
                         <div class="flex justify-between items-center text-xs font-semibold text-slate-700">
                             <span>Uploaded Candidate Datasets (<span id="target-file-count">0</span> files):</span>
@@ -186,7 +179,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Execution Bar -->
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center justify-end">
                 <button onclick="executeReconciliation()" id="run-btn" disabled class="w-full sm:w-auto px-6 py-3 bg-hkust-navy hover:bg-slate-800 text-white font-semibold text-xs rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-lg">
@@ -195,7 +187,6 @@
                 </button>
             </div>
         </div>
-
         <!-- TAB 2: RECONCILIATION REVIEW QUEUE -->
         <div id="tab-content-reconcile" class="hidden space-y-6">
             <!-- Summary Dashboard Stats Cards -->
@@ -221,7 +212,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Search & Filter Controls -->
             <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
                 <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
@@ -257,7 +247,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Result Table -->
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="overflow-x-auto custom-scrollbar">
@@ -275,8 +264,8 @@
                             <tr>
                                 <td colspan="5" class="p-8 text-center text-slate-400">
                                     <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i>
-                                    <p class="font-medium text-slate-600">No records loaded in reconciliation queue.</p>
-                                    <p class="text-slate-400 text-[11px] mt-1">Upload Scopus and Candidate files to begin reconciliation.</p>
+                                    <p class="font-medium text-slate-600">No records found.</p>
+                                    <p class="text-slate-400 text-[11px] mt-1">Please upload Scopus and Candidate files to run the program.</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -288,14 +277,13 @@
                     </div>
                     <div class="flex items-center space-x-2">
                         <button onclick="changePage(-1)" id="btn-prev-page" disabled class="px-3 py-1 bg-white border border-slate-300 rounded font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
-                        <span class="text-slate-600 font-medium">Page <span id="current-page-num">1</span> of <span id="total-pages-num">1</span></span>
+                        <span id="pagination-controls" class="text-slate-600 font-medium">Page <span id="current-page-num">1</span> of <span id="total-pages-num">1</span></span>
                         <button onclick="changePage(1)" id="btn-next-page" disabled class="px-3 py-1 bg-white border border-slate-300 rounded font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-
     <!-- Comparative Review Inspector Modal -->
     <div id="modal-diff" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
@@ -363,7 +351,6 @@
             </div>
         </div>
     </div>
-
     <script>
         const COLUMN_ALIASES = {
             title: ['title', 'publication title', 'document title', 'article title', 'article name', 'document_title', 'paper title', 'pub_title', '篇名', '题目', 'ti'],
@@ -374,7 +361,6 @@
             affiliation: ['affiliation', 'affiliations', 'author keywords', 'address', 'institution', 'organization', 'c1', 'rp', '单位', '机构', 'affil'],
             source: ['source', 'database', 'db']
         };
-
         const state = {
             scopusData: [],
             targetFiles: [],
@@ -386,13 +372,11 @@
             pageSize: 15,
             activeDiffRecord: null
         };
-
         const fastIndex = {
             scopusDoiMap: new Map(),
             scopusTitleMap: new Map(),
             scopusTokenIndex: new Map()
         };
-
         function handleFileUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
@@ -403,7 +387,6 @@
             }
             event.target.value = '';
         }
-
         function processFile(file, type) {
             const fileName = file.name;
             const ext = fileName.split('.').pop().toLowerCase();
@@ -425,7 +408,6 @@
                         showToast('Unsupported file format: ' + ext);
                         return;
                     }
-
                     const mappedRecords = rawRecords.map((item, idx) => {
                         const mapped = mapHeadersToStandard(item);
                         return {
@@ -438,12 +420,10 @@
                             source: mapped.source || (type === 'scopus' ? 'Scopus' : fileName)
                         };
                     }).filter(r => (r.title && r.title.trim().length > 0) || (r.doi && r.doi.trim().length > 0));
-
                     if (mappedRecords.length === 0) {
                         showToast(`No valid publication records parsed from ${fileName}`);
                         return;
                     }
-
                     if (type === 'scopus') {
                         state.scopusData = mappedRecords;
                         const infoEl = document.getElementById('scopus-file-info');
@@ -470,14 +450,12 @@
                     showToast('Failed to parse file: ' + file.name);
                 }
             };
-
             if (ext === 'xlsx' || ext === 'xls') {
                 reader.readAsArrayBuffer(file);
             } else {
                 reader.readAsText(file);
             }
         }
-
         function rebuildTargetData() {
             state.targetData = [];
             state.targetFiles.forEach(f => state.targetData.push(...f.records));
@@ -504,14 +482,12 @@
                 listEl.innerHTML = '';
             }
         }
-
         function removeTargetFile(fileId) {
             state.targetFiles = state.targetFiles.filter(f => f.id !== fileId);
             rebuildTargetData();
             checkRunButtonState();
             updateStats();
         }
-
         function clearAllTargetFiles() {
             state.targetFiles = [];
             rebuildTargetData();
@@ -519,14 +495,12 @@
             updateStats();
             showToast('Cleared candidate dataset queue.');
         }
-
         function checkRunButtonState() {
             const runBtn = document.getElementById('run-btn');
             if (runBtn) {
                 runBtn.disabled = !(state.scopusData.length > 0 && state.targetData.length > 0);
             }
         }
-
         function mapHeadersToStandard(rawObj) {
             const mapped = { title: '', doi: '', authors: '', journal: '', year: '', affiliation: '', source: '' };
             const keys = Object.keys(rawObj || {});
@@ -545,7 +519,6 @@
             if (!mapped.year) mapped.year = rawObj['Year'] || rawObj['year'] || '';
             return mapped;
         }
-
         function normalizeTitle(title) {
             if (!title) return '';
             let t = String(title).toLowerCase();
@@ -556,7 +529,6 @@
             t = t.replace(/[^\w\s\u4e00-\u9fa5]/gi, ' ');
             return t.replace(/\s+/g, ' ').trim();
         }
-
         function normalizeDOI(doi) {
             if (!doi) return '';
             let d = String(doi).trim().toLowerCase();
@@ -569,31 +541,25 @@
             d = d.replace(/^doi:\s*/, '');
             return d.replace(/[\.\/]+$/, '').trim();
         }
-
         function calculateSimilarity(str1, str2) {
             if (!str1 || !str2) return 0;
             if (str1 === str2) return 1.0;
             const maxLen = Math.max(str1.length, str2.length);
             if (maxLen === 0) return 1.0;
             if (Math.abs(str1.length - str2.length) / maxLen > 0.35) return 0;
-
             const jwScore = jaroWinkler(str1, str2);
             if (jwScore < 0.5) return jwScore * 0.6;
-
             const levScore = 1 - (levenshteinDistance(str1, str2) / maxLen);
             return (jwScore * 0.6) + (levScore * 0.4);
         }
-
         function levenshteinDistance(a, b) {
             const al = a.length;
             const bl = b.length;
             if (al === 0) return bl;
             if (bl === 0) return al;
-
             let prev = new Int32Array(bl + 1);
             let curr = new Int32Array(bl + 1);
             for (let j = 0; j <= bl; j++) prev[j] = j;
-
             for (let i = 1; i <= al; i++) {
                 curr[0] = i;
                 const ac = a.charCodeAt(i - 1);
@@ -607,18 +573,15 @@
             }
             return prev[bl];
         }
-
         function jaroWinkler(s1, s2) {
             let m = 0;
             const l1 = s1.length;
             const l2 = s2.length;
             if (l1 === 0 || l2 === 0) return 0;
             if (s1 === s2) return 1;
-
             const range = Math.max(0, Math.floor(Math.max(l1, l2) / 2) - 1);
             const s1Matches = new Array(l1).fill(false);
             const s2Matches = new Array(l2).fill(false);
-
             for (let i = 0; i < l1; i++) {
                 const low = Math.max(0, i - range);
                 const high = Math.min(i + range + 1, l2);
@@ -632,7 +595,6 @@
                 }
             }
             if (m === 0) return 0;
-
             let k = 0, numTrans = 0;
             for (let i = 0; i < l1; i++) {
                 if (s1Matches[i]) {
@@ -641,14 +603,12 @@
                     k++;
                 }
             }
-
             const jaro = (m / l1 + m / l2 + (m - numTrans / 2) / m) / 3;
             let l = 0;
             const maxPrefix = Math.min(4, Math.min(l1, l2));
             while (l < maxPrefix && s1[l] === s2[l]) l++;
             return jaro + l * 0.1 * (1 - jaro);
         }
-
         function parseBibTeX(text) {
             const entries = [];
             if (!text) return entries;
@@ -736,7 +696,6 @@
             }
             return entries;
         }
-
         function cleanBibValue(val) {
             if (!val) return '';
             let str = String(val).trim();
@@ -744,11 +703,9 @@
             str = str.replace(/\{([^{}]+)\}/g, '$1');
             return str.replace(/\s+/g, ' ').trim();
         }
-
         function setupDropzones() {
             window.addEventListener('dragover', (e) => e.preventDefault(), false);
             window.addEventListener('drop', (e) => e.preventDefault(), false);
-
             ['scopus', 'target'].forEach(type => {
                 const dropzone = document.getElementById(`${type}-dropzone`);
                 if (!dropzone) return;
@@ -781,7 +738,6 @@
                 }, false);
             });
         }
-
         function executeReconciliation() {
             if (state.scopusData.length === 0 || state.targetData.length === 0) {
                 showToast('Please upload both Scopus Baseline and Candidate target files.');
@@ -791,11 +747,9 @@
             const pBar = document.getElementById('progress-bar');
             safeSetText('progress-title', 'Running...');
             if (modal) modal.classList.remove('hidden');
-
             fastIndex.scopusDoiMap.clear();
             fastIndex.scopusTitleMap.clear();
             fastIndex.scopusTokenIndex.clear();
-
             state.scopusData.forEach(item => {
                 const normDoi = normalizeDOI(item.doi);
                 if (normDoi) fastIndex.scopusDoiMap.set(normDoi, item);
@@ -811,12 +765,10 @@
                     });
                 }
             });
-
             const total = state.targetData.length;
             const results = [];
             let processed = 0;
             const batchSize = 60;
-
             function processBatch(startIndex) {
                 const endIndex = Math.min(startIndex + batchSize, total);
                 for (let i = startIndex; i < endIndex; i++) {
@@ -826,7 +778,6 @@
                     let bestMatch = null;
                     let matchScore = 0;
                     let matchReason = '';
-
                     if (tDoi && fastIndex.scopusDoiMap.has(tDoi)) {
                         bestMatch = fastIndex.scopusDoiMap.get(tDoi);
                         matchScore = 100;
@@ -854,11 +805,9 @@
                             }
                         }
                     }
-
                     let status = 'UNMATCHED';
                     if (matchScore >= 85) status = 'MATCHED';
                     else if (matchScore >= 65) status = 'FLAGGED';
-
                     results.push({
                         target: target,
                         bestMatch: bestMatch,
@@ -867,13 +816,11 @@
                         status: status
                     });
                 }
-
                 processed = endIndex;
                 const pct = Math.round((processed / total) * 100);
                 if (pBar) pBar.style.width = `${pct}%`;
                 safeSetText('progress-count', `${processed} / ${total}`);
                 safeSetText('progress-percent', `${pct}%`);
-
                 if (processed < total) {
                     setTimeout(() => processBatch(processed), 10);
                 } else {
@@ -889,7 +836,6 @@
             }
             processBatch(0);
         }
-
         function applyFilters() {
             const query = (document.getElementById('queue-search')?.value || '').toLowerCase();
             const statusFilter = document.getElementById('filter-status')?.value || 'UNMATCHED';
@@ -904,7 +850,6 @@
             state.currentPage = 1;
             renderQueue();
         }
-
         function renderQueue() {
             const tbody = document.getElementById('queue-tbody');
             if (!tbody) return;
@@ -915,18 +860,31 @@
             const startIdx = (state.currentPage - 1) * state.pageSize;
             const endIdx = Math.min(startIdx + state.pageSize, totalFiltered);
             const pageItems = state.filteredQueue.slice(startIdx, endIdx);
-
             safeSetText('page-start-idx', totalFiltered > 0 ? startIdx + 1 : 0);
             safeSetText('page-end-idx', endIdx);
             safeSetText('page-total-count', totalFiltered);
-            safeSetText('current-page-num', state.currentPage);
-            safeSetText('total-pages-num', totalPages);
+
+            const paginationControls = document.getElementById('pagination-controls');
+            if (totalPages > 1) {
+                let options = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    options += `<option value="${i}" ${i === state.currentPage ? 'selected' : ''}>${i}</option>`;
+                }
+                paginationControls.innerHTML = `
+                    Page 
+                    <select id="page-select" onchange="goToPage(this.value)" class="mx-1 text-xs border border-slate-300 rounded-md px-2 py-1 bg-white text-slate-800 focus:ring-2 focus:ring-hkust-blue font-semibold shadow-sm">
+                        ${options}
+                    </select> 
+                    of ${totalPages}
+                `;
+            } else {
+                 paginationControls.innerHTML = `Page 1 of 1`;
+            }
 
             const prevBtn = document.getElementById('btn-prev-page');
             const nextBtn = document.getElementById('btn-next-page');
             if (prevBtn) prevBtn.disabled = state.currentPage <= 1;
             if (nextBtn) nextBtn.disabled = state.currentPage >= totalPages;
-
             if (pageItems.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -939,7 +897,6 @@
                 if (window.lucide) lucide.createIcons();
                 return;
             }
-
             pageItems.forEach((item, pIdx) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
@@ -950,7 +907,6 @@
                 } else if (item.status === 'FLAGGED') {
                     statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">${item.score}% Match</span>`;
                 }
-
                 tr.innerHTML = `
                     <td class="p-3.5 text-center">
                         <input type="checkbox" onchange="toggleSelectRecord('${item.target.id}', this.checked)" ${isChecked ? 'checked' : ''} class="rounded text-hkust-navy focus:ring-hkust-navy">
@@ -977,12 +933,10 @@
             });
             if (window.lucide) lucide.createIcons();
         }
-
         function safeSetText(id, val) {
             const el = document.getElementById(id);
             if (el) el.textContent = val;
         }
-
         function switchTab(tab) {
             const uploadTab = document.getElementById('tab-content-upload');
             const reconcileTab = document.getElementById('tab-content-reconcile');
@@ -1000,25 +954,21 @@
                 btnUpload.className = "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center space-x-2";
             }
         }
-
         function toggleExportMenu() {
             const menu = document.getElementById('export-menu');
             if (menu) menu.classList.toggle('hidden');
         }
-
         function closeExportMenu() {
             const menu = document.getElementById('export-menu');
             if (menu) menu.classList.add('hidden');
         }
-
         function formatBibTeXTitle(title) {
             if (!title) return '';
             let cleaned = title.replace(/\s+/g, ' ').trim();
-            cleaned = cleaned.replace(/\{\[ \s*$/, '').replace(/,$/, '').trim();
-            cleaned = cleaned.replace(/\b([A-Z0-9\-]{2,})\b/g, '{$1}');
-            return cleaned.replace(/\\&/g, '___AMP___').replace(/&/g, '\\&').replace(/___AMP___/g, '\\&');
+            cleaned = cleaned.replace(/\{\s*$/, '').replace(/,$/, '').trim();
+            cleaned = cleaned.replace(/\b([A-Z0-9-]{2,})\b/g, '{$1}');
+            return cleaned.replace(/\\&/g, '\___AMP__\_').replace(/&/g, '\\&').replace(/\___AMP__\_/g, '\\&');
         }
-
         function toTitleCase(str) {
             if (!str) return '';
             let text = str.replace(/\s+/g, ' ').trim();
@@ -1029,9 +979,8 @@
                     return word.charAt(0).toUpperCase() + word.slice(1);
                 }).join(' ');
             }
-            return text.replace(/\\&/g, '___AMP___').replace(/&/g, '\\&').replace(/___AMP___/g, '\\&');
+            return text.replace(/\\&/g, '\___AMP__\_').replace(/&/g, '\\&').replace(/\___AMP__\_/g, '\\&');
         }
-
         function generateCiteKey(author, year, title) {
             let firstAuthor = 'Author';
             if (author) {
@@ -1047,7 +996,6 @@
             }
             return `${firstAuthor}${cleanYear}${keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase()}`;
         }
-
         function exportMissingPublications(format) {
             const missing = state.reconciliationResults.filter(r => r.status === 'UNMATCHED');
             if (missing.length === 0) {
@@ -1062,7 +1010,6 @@
                 Year: m.target.year,
                 DatabaseSource: m.target.source
             }));
-
             if (format === 'csv') {
                 const csv = Papa.unparse(exportData);
                 downloadBlob(csv, 'hkust_missing_publications.csv', 'text/csv;charset=utf-8;');
@@ -1076,7 +1023,7 @@
                     const citeKey = generateCiteKey(m.target.authors, m.target.year, m.target.title);
                     const cleanTitle = formatBibTeXTitle(m.target.title);
                     const cleanJournal = toTitleCase(m.target.journal);
-                    const cleanAuthors = (m.target.authors || '').replace(/\s+/g, ' ').replace(/\\&/g, '___AMP___').replace(/&/g, '\\&').replace(/___AMP___/g, '\\&').trim();
+                    const cleanAuthors = (m.target.authors || '').replace(/\s+/g, ' ').replace(/\\&/g, '\___AMP__\_').replace(/&/g, '\\&').replace(/\___AMP__\_/g, '\\&').trim();
                     const cleanDoi = (m.target.doi || '').trim();
                     let fields = [];
                     if (cleanTitle) fields.push(`  title={${cleanTitle}}`);
@@ -1090,7 +1037,6 @@
             }
             showToast(`Exported ${missing.length} missing records as .${format.toUpperCase()}`);
         }
-
         function exportAuditReport() {
             if (state.reconciliationResults.length === 0) {
                 showToast('No reconciliation audit log available.');
@@ -1113,7 +1059,6 @@
             XLSX.writeFile(wb, "hkust_reconciliation_audit_report.xlsx");
             showToast('Exported full audit log report.');
         }
-
         function downloadBlob(content, filename, contentType) {
             const blob = new Blob([content], { type: contentType });
             const url = URL.createObjectURL(blob);
@@ -1127,7 +1072,6 @@
                 URL.revokeObjectURL(url);
             }, 100);
         }
-
         function toggleSelectAll(checked) {
             if (checked) {
                 state.filteredQueue.forEach(item => state.selectedIds.add(item.target.id));
@@ -1137,36 +1081,34 @@
             renderQueue();
             updateSelectedCount();
         }
-
         function toggleSelectRecord(id, checked) {
             if (checked) state.selectedIds.add(id);
             else state.selectedIds.delete(id);
             updateSelectedCount();
         }
-
         function updateSelectedCount() {
             safeSetText('selected-count', state.selectedIds.size);
         }
-
         function changePage(delta) {
             state.currentPage += delta;
             renderQueue();
         }
-
+        function goToPage(page) {
+            state.currentPage = parseInt(page, 10);
+            renderQueue();
+        }
         function openDiffModal(targetId) {
             const item = state.reconciliationResults.find(r => r.target.id === targetId);
             if (!item) return;
             state.activeDiffRecord = item;
             const modal = document.getElementById('modal-diff');
             if (!modal) return;
-
             safeSetText('modal-cand-source', `Candidate (${item.target.source || 'Target Dataset'})`);
             safeSetText('modal-cand-title', item.target.title || 'Untitled');
             safeSetText('modal-cand-doi', item.target.doi || 'No DOI provided');
             safeSetText('modal-cand-authors', item.target.authors || 'N/A');
             safeSetText('modal-cand-journal', item.target.journal || 'N/A');
             safeSetText('modal-cand-year', item.target.year || 'N/A');
-
             if (item.bestMatch) {
                 safeSetText('modal-scopus-title', item.bestMatch.title || 'N/A');
                 safeSetText('modal-scopus-doi', item.bestMatch.doi || 'N/A');
@@ -1180,28 +1122,23 @@
                 safeSetText('modal-scopus-journal', 'N/A');
                 safeSetText('modal-scopus-year', 'N/A');
             }
-
             safeSetText('modal-match-status', item.status === 'MATCHED' ? 'Duplicate Record Found' : (item.status === 'FLAGGED' ? 'Potential Match Identified' : 'Novel Missing Publication'));
             safeSetText('modal-match-reason', item.reason);
             safeSetText('modal-match-score', `${item.score}% Match`);
             modal.classList.remove('hidden');
         }
-
         function closeDiffModal() {
             const modal = document.getElementById('modal-diff');
             if (modal) modal.classList.add('hidden');
             state.activeDiffRecord = null;
         }
-
         function updateStats() {
             const total = state.reconciliationResults.length;
             const unmatched = state.reconciliationResults.filter(r => r.status === 'UNMATCHED').length;
             safeSetText('stat-total', total);
             safeSetText('stat-unmatched', unmatched);
-
             const pendingBadge = document.getElementById('pending-badge');
             if (pendingBadge) pendingBadge.innerText = unmatched;
-
             const dbStatus = document.getElementById('db-status');
             if (dbStatus) {
                 dbStatus.innerHTML = `
@@ -1210,7 +1147,6 @@
                 `;
             }
         }
-
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -1220,7 +1156,6 @@
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
         }
-
         function showToast(msg) {
             const toast = document.createElement('div');
             toast.className = 'fixed bottom-5 right-5 bg-hkust-navy text-white text-xs px-4 py-3 rounded-lg shadow-xl z-50 transition transform duration-300 translate-y-0';
@@ -1232,7 +1167,6 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
-
         window.onload = function() {
             if (window.lucide) lucide.createIcons();
             setupDropzones();
