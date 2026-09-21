@@ -131,31 +131,28 @@
         <!-- TAB 1: FILE UPLOAD & CONFIGURATION -->
         <div id="tab-content-upload" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Baseline File Card (Scopus) -->
+                <!-- Baseline File Card (Scopus - Multi-File Supported) -->
                 <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <span class="w-3 h-3 bg-blue-600 rounded-full"></span>
                             <h2 class="font-bold text-slate-800 text-base">Primary Reference Dataset</h2>
                         </div>
-                        <span class="text-xs bg-blue-100 text-blue-800 font-semibold px-2.5 py-1 rounded">Scopus File</span>
+                        <span class="text-xs bg-blue-100 text-blue-800 font-semibold px-2.5 py-1 rounded">Scopus Files</span>
                     </div>
                     <p class="text-xs text-slate-500">Upload existing HKUST records exported from Scopus (.csv, .xlsx, .bib).</p>
-                    <div id="scopus-dropzone" onclick="document.getElementById('scopus-input').click()" class="border-2 border-dashed border-slate-300 hover:border-hkust-blue rounded-lg p-6 text-center cursor-pointer transition bg-slate-50 hover:bg-slate-100">
-                        <i data-lucide="file-spreadsheet" class="w-10 h-10 mx-auto text-slate-400 mb-2"></i>
-                        <p class="text-xs font-semibold text-slate-700">Click to browse or drop Scopus file here</p>
-                        <p class="text-[11px] text-slate-400 mt-1">Supports XLSX, CSV, or BibTeX files</p>
+                    <div id="scopus-dropzone" onclick="document.getElementById('scopus-input').click()" class="border-2 border-dashed border-slate-300 hover:border-hkust-blue rounded-lg p-5 text-center cursor-pointer transition bg-slate-50 hover:bg-slate-100">
+                        <i data-lucide="file-spreadsheet" class="w-9 h-9 mx-auto text-slate-400 mb-1.5"></i>
+                        <p class="text-xs font-semibold text-slate-700">Click to browse or drop Scopus file(s) here</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Supports XLSX, CSV, or BibTeX (Select multiple or upload sequentially)</p>
                     </div>
-                    <input type="file" id="scopus-input" accept=".csv,.xlsx,.xls,.bib" class="hidden" onclick="event.stopPropagation()" onchange="handleFileUpload(event, 'scopus')">
-                    <div id="scopus-file-info" class="hidden bg-slate-100 rounded-lg p-3 text-xs space-y-2 border border-slate-200">
-                        <div class="flex items-center justify-between font-semibold text-slate-700">
-                            <span id="scopus-filename" class="truncate max-w-[200px]">filename.csv</span>
-                            <span id="scopus-count" class="bg-blue-600 text-white px-2 py-0.5 rounded text-[10px]">0 records</span>
+                    <input type="file" id="scopus-input" accept=".csv,.xlsx,.xls,.bib" multiple class="hidden" onclick="event.stopPropagation()" onchange="handleFileUpload(event, 'scopus')">
+                    <div id="scopus-file-info" class="hidden space-y-2">
+                        <div class="flex justify-between items-center text-xs font-semibold text-slate-700">
+                            <span>Uploaded Primary Datasets (<span id="scopus-file-count">0</span> files):</span>
+                            <button onclick="clearAllScopusFiles()" class="text-[10px] text-red-600 hover:underline">Clear Scopus Queue</button>
                         </div>
-                        <div class="text-[11px] text-slate-500 flex justify-between">
-                            <span>Detected Format: <strong id="scopus-format">CSV</strong></span>
-                            <span>Mapped Columns: <strong id="scopus-mapped-cols">Auto-detected</strong></span>
-                        </div>
+                        <div id="scopus-files-list" class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar pr-1"></div>
                     </div>
                 </div>
 
@@ -211,7 +208,7 @@
                     <div>
                         <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Missing Publications</p>
                         <p id="stat-unmatched" class="text-3xl font-extrabold text-blue-700 mt-1">0</p>
-                        <p class="text-[11px] text-blue-600/70 mt-0.5">Novel records and potential matches (Unmatched & Flagged)</p>
+                        <p class="text-[11px] text-blue-600/70 mt-0.5">Publications not found in Scopus master datasets</p>
                     </div>
                     <div class="p-3.5 bg-blue-50 rounded-xl text-blue-600">
                         <i data-lucide="plus-circle" class="w-6 h-6"></i>
@@ -219,23 +216,56 @@
                 </div>
             </div>
 
-            <!-- Controls -->
+            <!-- Controls: Status -> Document Type -> Title Similarity -> Publication Year -->
             <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
-                <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
-                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                <div class="flex flex-col xl:flex-row gap-3 items-center justify-between">
+                    <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                        <!-- 1. Filter Status Dropdown -->
                         <div class="flex items-center space-x-2">
                             <label for="filter-status" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Filter Status:</label>
-                            <select id="filter-status" onchange="applyFilters()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-hkust-blue font-semibold shadow-sm min-w-[280px]">
-                                <option value="UNMATCHED" selected>Show missing publications (Unmatched & Flagged)</option>
+                            <select id="filter-status" onchange="applyFilters()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-hkust-blue font-semibold shadow-sm min-w-[240px]">
+                                <option value="UNMATCHED" selected>Show publications not found in Scopus</option>
                                 <option value="ALL">Show all publications</option>
                             </select>
                         </div>
+
+                        <!-- 2. Filter Document Type Dropdown (Directly left of Title Similarity) -->
+                        <div class="flex items-center space-x-2">
+                            <label for="filter-doctype" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Document Type:</label>
+                            <select id="filter-doctype" onchange="applyFilters()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-hkust-blue font-semibold shadow-sm min-w-[160px]">
+                                <option value="ALL" selected>All Document Types</option>
+                            </select>
+                        </div>
+
+                        <!-- 3. Filter Title Similarity Dropdown -->
+                        <div class="flex items-center space-x-2">
+                            <label for="filter-similarity" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Title Similarity:</label>
+                            <select id="filter-similarity" onchange="applyFilters()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-hkust-blue font-semibold shadow-sm min-w-[140px]">
+                                <option value="ALL" selected>All Matches</option>
+                                <option value="0">0% (Novel)</option>
+                                <option value="1-64">1% – 64%</option>
+                                <option value="65-84">65% – 84%</option>
+                                <option value="85-99">85% – 99%</option>
+                                <option value="100">100% Match</option>
+                            </select>
+                        </div>
+
+                        <!-- 4. Filter Publication Year Dropdown -->
+                        <div class="flex items-center space-x-2">
+                            <label for="filter-year" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Publication Year:</label>
+                            <select id="filter-year" onchange="applyFilters()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-hkust-blue font-semibold shadow-sm min-w-[120px]">
+                                <option value="ALL" selected>All Years</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="relative w-full sm:w-80">
+
+                    <!-- Search Input -->
+                    <div class="relative w-full xl:w-72">
                         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-                        <input type="text" id="queue-search" oninput="applyFilters()" placeholder="Search title, DOI, journal, document type..." class="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-hkust-blue">
+                        <input type="text" id="queue-search" oninput="applyFilters()" placeholder="Search title, DOI, journal, author..." class="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-hkust-blue">
                     </div>
                 </div>
+
                 <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs gap-2">
                     <div class="flex items-center space-x-2 text-slate-600">
                         <input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this.checked)" class="rounded text-hkust-navy focus:ring-hkust-navy">
@@ -255,15 +285,15 @@
                 </div>
             </div>
 
-            <!-- Result Table: Expanded Full-Width Structure -->
+            <!-- Result Table: Document Type placed as the first data column -->
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden w-full">
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
                             <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 uppercase text-[11px] tracking-wider">
                                 <th class="p-3.5 w-10 text-center"><input type="checkbox" id="header-select-all" onchange="toggleSelectAll(this.checked)"></th>
-                                <th class="p-3.5 w-44 whitespace-nowrap">Document Type</th>
-                                <th class="p-3.5 min-w-[320px]">Publication Title & Authors</th>
+                                <th class="p-3.5 w-44 text-center whitespace-nowrap">Document Type</th>
+                                <th class="p-3.5 min-w-[340px]">Publication Title & Authors</th>
                                 <th class="p-3.5 w-52 whitespace-nowrap">DOI Identifier</th>
                                 <th class="p-3.5 w-72">Journal / Source</th>
                                 <th class="p-3.5 w-40 text-center whitespace-nowrap">Title Similarity</th>
@@ -274,7 +304,7 @@
                                 <td colspan="6" class="p-8 text-center text-slate-400">
                                     <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i>
                                     <p class="font-medium text-slate-600">No records found.</p>
-                                    <p class="text-slate-400 text-[11px] mt-1">Please upload Scopus and Candidate files to run the program.</p>
+                                    <p class="text-slate-400 text-[11px] mt-1">Please upload Scopus and Candidate files or adjust active filter criteria.</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -378,6 +408,7 @@
         };
 
         const state = {
+            scopusFiles: [],
             scopusData: [],
             targetFiles: [],
             targetData: [],
@@ -398,21 +429,43 @@
         function handleFileUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            if (type === 'target') {
-                Array.from(files).forEach(f => processFile(f, 'target'));
-            } else {
-                processFile(files[0], type);
-            }
+            Array.from(files).forEach(f => processFile(f, type));
             event.target.value = '';
+        }
+
+        // Author list formatter: show first 10 authors and add "et al." if exceeding 10
+        function formatAuthors(authorsStr, maxAuthors = 10) {
+            if (!authorsStr) return 'Unknown Authors';
+            const str = String(authorsStr).trim();
+            if (!str) return 'Unknown Authors';
+
+            let authorList = [];
+            let separator = '; ';
+
+            if (/\s+and\s+/i.test(str)) {
+                authorList = str.split(/\s+and\s+/i);
+                separator = ' and ';
+            } else if (str.includes(';')) {
+                authorList = str.split(/\s*;\s*/);
+                separator = '; ';
+            }
+
+            if (authorList.length > 0) {
+                authorList = authorList.map(a => a.trim()).filter(a => a.length > 0);
+                if (authorList.length > maxAuthors) {
+                    return authorList.slice(0, maxAuthors).join(separator) + ' et al.';
+                }
+                return str;
+            }
+
+            return str;
         }
 
         // Helper to sanitize document types, remove "Early Access", and match composite types
         function normalizeDocType(dt) {
             if (!dt) return 'Article';
             let str = String(dt).trim();
-            // Remove curly braces or quotes if present
             str = str.replace(/[\{\}\"\'\(\)]/g, '');
-            // Strip out "Early Access" (case insensitive) and delimiters
             str = str.replace(/early\s*access/gi, '');
             str = str.replace(/^[;\,\-\s\/]+|[;\,\-\s\/]+$/g, '').trim();
 
@@ -420,7 +473,6 @@
 
             const lower = str.toLowerCase();
             if (lower.includes('retraction')) return 'Retraction';
-            // Match specific compound types first before single words
             if (lower.includes('book review')) return 'Book Review';
             if (lower.includes('book chapter') || lower.includes('incollection')) return 'Book Chapter';
             if (lower.includes('conference') || lower.includes('proceeding') || lower.includes('inproceedings') || lower === 'cp') return 'Conference Paper';
@@ -513,12 +565,14 @@
                     }
 
                     if (type === 'scopus') {
-                        state.scopusData = mappedRecords;
-                        const infoEl = document.getElementById('scopus-file-info');
-                        if (infoEl) infoEl.classList.remove('hidden');
-                        safeSetText('scopus-filename', fileName);
-                        safeSetText('scopus-count', `${mappedRecords.length} records`);
-                        safeSetText('scopus-format', ext.toUpperCase());
+                        const fileId = 'scopus_file_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+                        state.scopusFiles.push({
+                            id: fileId,
+                            name: fileName,
+                            count: mappedRecords.length,
+                            records: mappedRecords
+                        });
+                        rebuildScopusData();
                         showToast(`Loaded ${mappedRecords.length} baseline records from ${fileName}`);
                     } else {
                         const fileId = 'target_file_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
@@ -543,6 +597,48 @@
             } else {
                 reader.readAsText(file);
             }
+        }
+
+        function rebuildScopusData() {
+            state.scopusData = [];
+            state.scopusFiles.forEach(f => state.scopusData.push(...f.records));
+            const infoContainer = document.getElementById('scopus-file-info');
+            const listEl = document.getElementById('scopus-files-list');
+            if (!infoContainer || !listEl) return;
+            if (state.scopusFiles.length > 0) {
+                infoContainer.classList.remove('hidden');
+                safeSetText('scopus-file-count', state.scopusFiles.length);
+                listEl.innerHTML = state.scopusFiles.map(f => `
+                    <div class="flex items-center justify-between bg-slate-100 p-2 rounded text-xs border border-slate-200">
+                        <span class="truncate max-w-[180px] font-medium text-slate-700" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-[10px] font-bold">${f.count} items</span>
+                            <button onclick="removeScopusFile('${f.id}')" class="text-slate-400 hover:text-red-600 transition">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                if (window.lucide) lucide.createIcons();
+            } else {
+                infoContainer.classList.add('hidden');
+                listEl.innerHTML = '';
+            }
+        }
+
+        function removeScopusFile(fileId) {
+            state.scopusFiles = state.scopusFiles.filter(f => f.id !== fileId);
+            rebuildScopusData();
+            checkRunButtonState();
+            updateStats();
+        }
+
+        function clearAllScopusFiles() {
+            state.scopusFiles = [];
+            rebuildScopusData();
+            checkRunButtonState();
+            updateStats();
+            showToast('Cleared Scopus reference dataset queue.');
         }
 
         function rebuildTargetData() {
@@ -834,11 +930,7 @@
                     dropzone.classList.remove('border-hkust-gold', 'bg-slate-100');
                     const dt = e.dataTransfer;
                     if (dt && dt.files.length > 0) {
-                        if (type === 'target') {
-                            Array.from(dt.files).forEach(f => processFile(f, 'target'));
-                        } else {
-                            processFile(dt.files[0], type);
-                        }
+                        Array.from(dt.files).forEach(f => processFile(f, type));
                     }
                 }, false);
             });
@@ -940,6 +1032,7 @@
                     setTimeout(() => {
                         state.reconciliationResults = results;
                         if (modal) modal.classList.add('hidden');
+                        populateDynamicFilterOptions();
                         switchTab('reconcile');
                         applyFilters();
                         updateStats();
@@ -950,16 +1043,92 @@
             processBatch(0);
         }
 
+        // Populate dynamic Year & DocType filter options from reconciled dataset
+        function populateDynamicFilterOptions() {
+            // Populate Document Types in Filter Bar
+            const docTypeSelect = document.getElementById('filter-doctype');
+            if (docTypeSelect) {
+                const currentDoc = docTypeSelect.value;
+                const typesSet = new Set();
+                state.reconciliationResults.forEach(r => {
+                    const dt = (r.target.doctype || 'Article').trim();
+                    if (dt) typesSet.add(dt);
+                });
+                const sortedTypes = Array.from(typesSet).sort();
+                let docHtml = '<option value="ALL">All Document Types</option>';
+                sortedTypes.forEach(t => {
+                    docHtml += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`;
+                });
+                docTypeSelect.innerHTML = docHtml;
+                if (typesSet.has(currentDoc)) {
+                    docTypeSelect.value = currentDoc;
+                } else {
+                    docTypeSelect.value = 'ALL';
+                }
+            }
+
+            // Populate Years
+            const yearSelect = document.getElementById('filter-year');
+            if (yearSelect) {
+                const currentVal = yearSelect.value;
+                const yearsSet = new Set();
+                state.reconciliationResults.forEach(r => {
+                    const y = (r.target.year || '').trim();
+                    if (y && /^\d{4}$/.test(y)) yearsSet.add(y);
+                });
+                const sortedYears = Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
+                let yearHtml = '<option value="ALL">All Years</option>';
+                sortedYears.forEach(y => {
+                    yearHtml += `<option value="${y}">${y}</option>`;
+                });
+                yearSelect.innerHTML = yearHtml;
+                if (yearsSet.has(currentVal)) {
+                    yearSelect.value = currentVal;
+                } else {
+                    yearSelect.value = 'ALL';
+                }
+            }
+        }
+
         function applyFilters() {
             const query = (document.getElementById('queue-search')?.value || '').toLowerCase();
             const statusFilter = document.getElementById('filter-status')?.value || 'UNMATCHED';
+            const docTypeFilter = document.getElementById('filter-doctype')?.value || 'ALL';
+            const similarityFilter = document.getElementById('filter-similarity')?.value || 'ALL';
+            const yearFilter = document.getElementById('filter-year')?.value || 'ALL';
+
             state.filteredQueue = state.reconciliationResults.filter(item => {
-                // When viewing missing publications, show both UNMATCHED (<65%) and FLAGGED (65-84%) records
+                // 1. Status Filter: missing shows UNMATCHED & FLAGGED (excludes MATCHED)
                 if (statusFilter === 'UNMATCHED' && item.status === 'MATCHED') return false;
+
+                // 2. Document Type Filter
+                if (docTypeFilter !== 'ALL') {
+                    const itemDocType = (item.target.doctype || 'Article').trim();
+                    if (itemDocType !== docTypeFilter) return false;
+                }
+
+                // 3. Title Similarity Filter
+                if (similarityFilter !== 'ALL') {
+                    const s = item.score;
+                    if (similarityFilter === '0' && s !== 0) return false;
+                    if (similarityFilter === '1-64' && (s < 1 || s > 64)) return false;
+                    if (similarityFilter === '65-84' && (s < 65 || s > 84)) return false;
+                    if (similarityFilter === '85-99' && (s < 85 || s > 99)) return false;
+                    if (similarityFilter === '100' && s !== 100) return false;
+                }
+
+                // 4. Publication Year Filter
+                if (yearFilter !== 'ALL') {
+                    const itemYear = (item.target.year || '').trim();
+                    if (itemYear !== yearFilter) return false;
+                }
+
+                // 5. Query Search
                 if (query) {
-                    const haystack = `${item.target.title} ${item.target.doi} ${item.target.authors} ${item.target.journal} ${item.target.doctype}`.toLowerCase();
+                    const haystack = `${item.target.title} ${item.target.doi} ${item.target.authors} ${item.target.journal} ${item.target.doctype} ${item.target.year}`.toLowerCase();
                     if (!haystack.includes(query)) return false;
                 }
+
                 return true;
             });
             state.currentPage = 1;
@@ -1011,7 +1180,7 @@
                         <td colspan="6" class="p-8 text-center text-slate-400">
                             <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i>
                             <p class="font-medium text-slate-600">No records found.</p>
-                            <p class="text-slate-400 text-[11px] mt-1">Please upload Scopus and Candidate files to run the program.</p>
+                            <p class="text-slate-400 text-[11px] mt-1">Please upload Scopus and Candidate files or adjust active filter criteria.</p>
                         </td>
                     </tr>
                 `;
@@ -1024,7 +1193,7 @@
                 tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
                 const isChecked = state.selectedIds.has(item.target.id);
 
-                // Title Similarity Display Badge (without "(Flagged)")
+                // Title Similarity Display Badge
                 let similarityBadge = '';
                 if (item.score === 100) {
                     similarityBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">100% Match</span>';
@@ -1039,17 +1208,18 @@
                 }
 
                 const docTypeBadge = getDocTypeBadgeHtml(item.target.doctype);
+                const abbreviatedAuthors = formatAuthors(item.target.authors, 10);
 
                 tr.innerHTML = `
                     <td class="p-3.5 text-center">
                         <input type="checkbox" onchange="toggleSelectRecord('${item.target.id}', this.checked)" ${isChecked ? 'checked' : ''} class="rounded text-hkust-navy focus:ring-hkust-navy">
                     </td>
-                    <td class="p-3.5 whitespace-nowrap">
+                    <td class="p-3.5 text-center whitespace-nowrap">
                         ${docTypeBadge}
                     </td>
                     <td class="p-3.5">
                         <p class="font-bold text-slate-800 text-xs leading-snug hover:text-hkust-navy cursor-pointer" onclick="openDiffModal('${item.target.id}')">${escapeHtml(item.target.title)}</p>
-                        <p class="text-[11px] text-slate-500 mt-1"><i data-lucide="users" class="w-3 h-3 inline mr-1 text-slate-400"></i>${escapeHtml(item.target.authors || 'Unknown Authors')}</p>
+                        <p class="text-[11px] text-slate-500 mt-1" title="${escapeHtml(item.target.authors || '')}"><i data-lucide="users" class="w-3 h-3 inline mr-1 text-slate-400"></i>${escapeHtml(abbreviatedAuthors)}</p>
                     </td>
                     <td class="p-3.5 font-mono text-xs whitespace-nowrap">
                         ${item.target.doi ? `
@@ -1309,7 +1479,10 @@
             safeSetText('modal-cand-title', item.target.title || 'Untitled');
             safeSetText('modal-cand-doctype', item.target.doctype || 'Article');
             safeSetText('modal-cand-doi', item.target.doi || 'No DOI provided');
-            safeSetText('modal-cand-authors', item.target.authors || 'N/A');
+            safeSetText('modal-cand-authors', item.target.authors ? formatAuthors(item.target.authors, 10) : 'N/A');
+            const candAuthEl = document.getElementById('modal-cand-authors');
+            if (candAuthEl) candAuthEl.title = item.target.authors || '';
+
             safeSetText('modal-cand-journal', item.target.journal || 'N/A');
             safeSetText('modal-cand-year', item.target.year || 'N/A');
 
@@ -1317,7 +1490,10 @@
                 safeSetText('modal-scopus-title', item.bestMatch.title || 'N/A');
                 safeSetText('modal-scopus-doctype', item.bestMatch.doctype || 'Article');
                 safeSetText('modal-scopus-doi', item.bestMatch.doi || 'N/A');
-                safeSetText('modal-scopus-authors', item.bestMatch.authors || 'N/A');
+                safeSetText('modal-scopus-authors', item.bestMatch.authors ? formatAuthors(item.bestMatch.authors, 10) : 'N/A');
+                const scopusAuthEl = document.getElementById('modal-scopus-authors');
+                if (scopusAuthEl) scopusAuthEl.title = item.bestMatch.authors || '';
+
                 safeSetText('modal-scopus-journal', item.bestMatch.journal || 'N/A');
                 safeSetText('modal-scopus-year', item.bestMatch.year || 'N/A');
             } else {
@@ -1342,7 +1518,6 @@
 
         function updateStats() {
             const total = state.reconciliationResults.length;
-            // Missing count now includes both novel/unmatched (<65%) and flagged (65%-84%)
             const unmatched = state.reconciliationResults.filter(r => r.status === 'UNMATCHED' || r.status === 'FLAGGED').length;
             safeSetText('stat-total', total);
             safeSetText('stat-unmatched', unmatched);
