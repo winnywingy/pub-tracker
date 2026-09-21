@@ -105,7 +105,7 @@
         </div>
     </div>
 
-    <!-- Main Container: Adjusted to full width with padding to widen entire table -->
+    <!-- Main Container: Full width with padding -->
     <main class="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
         <!-- Navigation Tabs -->
         <div class="border-b border-slate-200 flex justify-between items-center">
@@ -255,7 +255,7 @@
                 </div>
             </div>
 
-            <!-- Result Table: Expanded Full-Width Structure with No Overflow Squishing -->
+            <!-- Result Table: Expanded Full-Width Structure -->
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden w-full">
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-left border-collapse text-xs">
@@ -264,7 +264,7 @@
                                 <th class="p-3.5 w-10 text-center"><input type="checkbox" id="header-select-all" onchange="toggleSelectAll(this.checked)"></th>
                                 <th class="p-3.5 w-44 whitespace-nowrap">Document Type</th>
                                 <th class="p-3.5 min-w-[320px]">Publication Title & Authors</th>
-                                <th class="p-3.5 w-52 whitespace-nowrap">DOI Identifier</th>
+                                <th class="p-3.5 w-52 whitespace-nowrap">DOI</th>
                                 <th class="p-3.5 w-72">Journal / Source</th>
                                 <th class="p-3.5 w-40 text-center whitespace-nowrap">Title Similarity</th>
                             </tr>
@@ -406,7 +406,7 @@
             event.target.value = '';
         }
 
-        // Helper to sanitize document types and remove "Early Access"
+        // Helper to sanitize document types, remove "Early Access", and match composite types
         function normalizeDocType(dt) {
             if (!dt) return 'Article';
             let str = String(dt).trim();
@@ -420,8 +420,10 @@
 
             const lower = str.toLowerCase();
             if (lower.includes('retraction')) return 'Retraction';
-            if (lower.includes('conference') || lower.includes('proceeding') || lower.includes('inproceedings') || lower === 'cp') return 'Conference Paper';
+            // Match specific compound types first before single words
+            if (lower.includes('book review')) return 'Book Review';
             if (lower.includes('book chapter') || lower.includes('incollection')) return 'Book Chapter';
+            if (lower.includes('conference') || lower.includes('proceeding') || lower.includes('inproceedings') || lower === 'cp') return 'Conference Paper';
             if (lower.includes('book') || lower === 'bk') return 'Book';
             if (lower.includes('review') || lower === 're') return 'Review';
             if (lower.includes('editorial')) return 'Editorial';
@@ -431,7 +433,7 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
-        // Get single-line styling badge classes per type
+        // Get single-line styling badge classes with distinct colors per type
         function getDocTypeBadgeHtml(type) {
             const doc = type || 'Article';
             let colorClasses = 'bg-slate-100 text-slate-800 border-slate-300';
@@ -444,8 +446,13 @@
                     colorClasses = 'bg-indigo-50 text-indigo-800 border border-indigo-300';
                     break;
                 case 'Book':
-                case 'Book Chapter':
                     colorClasses = 'bg-amber-50 text-amber-900 border border-amber-300';
+                    break;
+                case 'Book Chapter':
+                    colorClasses = 'bg-orange-50 text-orange-900 border border-orange-300';
+                    break;
+                case 'Book Review':
+                    colorClasses = 'bg-teal-50 text-teal-800 border border-teal-300';
                     break;
                 case 'Review':
                     colorClasses = 'bg-sky-50 text-sky-800 border border-sky-300';
@@ -775,7 +782,6 @@
                     fields[fieldKey] = cleanBibValue(fieldValue);
                 }
                 if (citeKey || Object.keys(fields).length > 0) {
-                    // Extract specifically from 'type' / 'doctype' line, or fallback to entryType
                     const explicitType = fields.type || fields.doctype;
                     const resolvedType = explicitType ? normalizeDocType(explicitType) : normalizeDocType(entryType);
 
