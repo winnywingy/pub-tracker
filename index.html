@@ -58,7 +58,7 @@
                         <span>Export Missing List</span>
                         <i data-lucide="chevron-down" class="w-3 h-3 ml-0.5"></i>
                     </button>
-                    <div id="export-menu" class="hidden absolute right-0 mt-2 w-52 rounded-lg shadow-xl bg-white ring-1 ring-slate-900/10 z-50 text-slate-700 divide-y divide-slate-100 overflow-hidden">
+                    <div id="export-menu" class="hidden absolute right-0 mt-2 w-56 rounded-lg shadow-xl bg-white ring-1 ring-slate-900/10 z-50 text-slate-700 divide-y divide-slate-100 overflow-hidden">
                         <div class="py-1.5">
                             <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Export Missing Records</div>
                             <button onclick="exportMissingPublications('xlsx'); closeExportMenu();" class="w-full text-left px-3.5 py-2 text-xs hover:bg-slate-100 flex items-center space-x-2 transition">
@@ -117,7 +117,7 @@
                 <button id="tab-btn-reconcile" onclick="switchTab('reconcile')" class="border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center space-x-2">
                     <i data-lucide="git-compare" class="w-4 h-4"></i>
                     <span>2. Review & Matching</span>
-                    <span id="pending-badge" class="ml-1 px-2 py-0.5 text-xs bg-amber-100 text-amber-800 rounded-full font-bold">0</span>
+                    <span id="pending-badge" class="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full font-bold">0</span>
                 </button>
             </nav>
             <div class="text-xs text-slate-500 flex items-center space-x-2">
@@ -211,7 +211,7 @@
                     <div>
                         <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Missing Publications</p>
                         <p id="stat-unmatched" class="text-3xl font-extrabold text-blue-700 mt-1">0</p>
-                        <p class="text-[11px] text-blue-600/70 mt-0.5">Not found in Scopus</p>
+                        <p class="text-[11px] text-blue-600/70 mt-0.5">Novel records and potential matches (Unmatched & Flagged)</p>
                     </div>
                     <div class="p-3.5 bg-blue-50 rounded-xl text-blue-600">
                         <i data-lucide="plus-circle" class="w-6 h-6"></i>
@@ -225,8 +225,8 @@
                     <div class="flex items-center space-x-3 w-full sm:w-auto">
                         <div class="flex items-center space-x-2">
                             <label for="filter-status" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Filter Status:</label>
-                            <select id="filter-status" onchange="applyFilters()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-hkust-blue font-semibold shadow-sm min-w-[240px]">
-                                <option value="UNMATCHED" selected>Show publications not found in Scopus</option>
+                            <select id="filter-status" onchange="applyFilters()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-hkust-blue font-semibold shadow-sm min-w-[280px]">
+                                <option value="UNMATCHED" selected>Show missing publications (Unmatched & Flagged)</option>
                                 <option value="ALL">Show all publications</option>
                             </select>
                         </div>
@@ -264,7 +264,7 @@
                                 <th class="p-3.5 w-10 text-center"><input type="checkbox" id="header-select-all" onchange="toggleSelectAll(this.checked)"></th>
                                 <th class="p-3.5 w-44 whitespace-nowrap">Document Type</th>
                                 <th class="p-3.5 min-w-[320px]">Publication Title & Authors</th>
-                                <th class="p-3.5 w-52 whitespace-nowrap">DOI</th>
+                                <th class="p-3.5 w-52 whitespace-nowrap">DOI Identifier</th>
                                 <th class="p-3.5 w-72">Journal / Source</th>
                                 <th class="p-3.5 w-40 text-center whitespace-nowrap">Title Similarity</th>
                             </tr>
@@ -385,7 +385,7 @@
             filteredQueue: [],
             selectedIds: new Set(),
             currentPage: 1,
-            pageSize: 15,
+            pageSize: 50,
             activeDiffRecord: null
         };
 
@@ -782,6 +782,7 @@
                     fields[fieldKey] = cleanBibValue(fieldValue);
                 }
                 if (citeKey || Object.keys(fields).length > 0) {
+                    // Extract specifically from 'type' / 'doctype' line, or fallback to entryType
                     const explicitType = fields.type || fields.doctype;
                     const resolvedType = explicitType ? normalizeDocType(explicitType) : normalizeDocType(entryType);
 
@@ -953,7 +954,8 @@
             const query = (document.getElementById('queue-search')?.value || '').toLowerCase();
             const statusFilter = document.getElementById('filter-status')?.value || 'UNMATCHED';
             state.filteredQueue = state.reconciliationResults.filter(item => {
-                if (statusFilter === 'UNMATCHED' && item.status !== 'UNMATCHED') return false;
+                // When viewing missing publications, show both UNMATCHED (<65%) and FLAGGED (65-84%) records
+                if (statusFilter === 'UNMATCHED' && item.status === 'MATCHED') return false;
                 if (query) {
                     const haystack = `${item.target.title} ${item.target.doi} ${item.target.authors} ${item.target.journal} ${item.target.doctype}`.toLowerCase();
                     if (!haystack.includes(query)) return false;
@@ -1022,7 +1024,7 @@
                 tr.className = 'hover:bg-slate-50/80 transition border-b border-slate-100';
                 const isChecked = state.selectedIds.has(item.target.id);
 
-                // Title Similarity Display Badge
+                // Title Similarity Display Badge (without "(Flagged)")
                 let similarityBadge = '';
                 if (item.score === 100) {
                     similarityBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">100% Match</span>';
@@ -1138,9 +1140,9 @@
             return `${firstAuthor}${cleanYear}${keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase()}`;
         }
 
-        // Robust XLSX / CSV / BibTeX Exporter
+        // Robust XLSX / CSV / BibTeX Exporter (includes UNMATCHED and FLAGGED)
         function exportMissingPublications(format) {
-            const missing = state.reconciliationResults.filter(r => r.status === 'UNMATCHED');
+            const missing = state.reconciliationResults.filter(r => r.status === 'UNMATCHED' || r.status === 'FLAGGED');
             if (missing.length === 0) {
                 showToast('No missing publications to export.');
                 return;
@@ -1154,6 +1156,7 @@
                 Journal: m.target.journal,
                 Year: m.target.year,
                 TitleSimilarity: m.score + '%',
+                Status: m.status,
                 DatabaseSource: m.target.source
             }));
 
@@ -1169,7 +1172,7 @@
                     const ws = XLSX.utils.json_to_sheet(exportData);
                     const wb = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(wb, ws, "Missing Publications");
-                    
+
                     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
                     const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                     const url = URL.createObjectURL(blob);
@@ -1339,7 +1342,8 @@
 
         function updateStats() {
             const total = state.reconciliationResults.length;
-            const unmatched = state.reconciliationResults.filter(r => r.status === 'UNMATCHED').length;
+            // Missing count now includes both novel/unmatched (<65%) and flagged (65%-84%)
+            const unmatched = state.reconciliationResults.filter(r => r.status === 'UNMATCHED' || r.status === 'FLAGGED').length;
             safeSetText('stat-total', total);
             safeSetText('stat-unmatched', unmatched);
             const pendingBadge = document.getElementById('pending-badge');
